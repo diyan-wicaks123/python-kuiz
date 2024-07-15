@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Question</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='quiz_question_styles.css') }}">
+    <link rel="icon" type="x-icon" href="{{ url_for('static', filename='quiz_icon.jpg') }}">
+</head>
+<body>
+    <h1>Quiz Question</h1>
+    <form action="/quiz" method="post">
+        <p>{{ question.question }}</p>
+        {% for option in question.options %}
+            <input type="radio" name="answer" value="{{ option }}"> {{ option }}<br>
+        {% endfor %}
+        <input type="hidden" name="question_index" value="{{ question_index }}">
+        <input type="submit" value="Next">
+    </form>
+    <!-- Tampilkan waktu mengerjakan kuis -->
+    <div id="time_remaining"></div>
+    <script>
+        // Set waktu mula mengerjakan quiz
+        var quizStartTime = new Date('{{ session.quiz_start_time }}' * 1000);
+        // Dapatkan waktu batas dari session dan konversi menjadi milidetik
+        var quizTimeLimit = parseInt('{{ session.quiz_time_limit }}') * 1000;
+    
+        // Update waktu yang tersisa setiap detik
+        var intervalId = setInterval(function() {
+            var now = new Date();
+            var timeRemaining = new Date(quizStartTime.getTime() + quizTimeLimit - now.getTime());
+    
+            var minutes = timeRemaining.getMinutes();
+            var seconds = timeRemaining.getSeconds();
+    
+            // Tampilkan waktu tersisa
+            document.getElementById('time_remaining').innerHTML = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+    
+            // Cek jika waktu habis
+            if (timeRemaining.getTime() <= 0) {
+                clearInterval(intervalId); // Hentikan interval
+                document.forms[0].submit(); // Submit form
+            }
+        }, 1000);
+    </script>    
+</body>
+</html>
